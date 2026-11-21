@@ -2,6 +2,24 @@
 
 用同一模型、条件、Latent 和种子比较 KSampler 的采样器与调度器。一次排队生成一张 XY 总图、每个成功组合的带标签 PNG 和一份耗时表。节点使用 ComfyUI V3 接口，直接读取当前 KSampler 已注册的选项。开发参考版本为 ComfyUI 0.46.0。
 
+## Krea 2 Turbo 实测
+
+用同一个种子比较三种采样器和两种调度器，均为 8 步、CFG 1。横向看同一调度器下的采样差异，纵向看同一采样器换调度器的效果。每格下方标出实际采样时间及相对基准 `res_2s / beta` 的速度。
+
+[![Krea 2 Turbo 的 3×2 对比总图，列为 res_2s、Euler、Heun，行为 beta、simple](docs/images/krea-2-turbo/grid.webp)](docs/images/krea-2-turbo/grid.webp)
+
+<details>
+<summary>展开 6 张独立结果，点击可查看原尺寸与耗时</summary>
+
+| 调度器 | res_2s | Euler | Heun |
+| --- | --- | --- | --- |
+| **beta** | [![res_2s / beta](docs/images/krea-2-turbo/res_2s-beta.webp)](docs/images/krea-2-turbo/res_2s-beta.webp) | [![Euler / beta](docs/images/krea-2-turbo/euler-beta.webp)](docs/images/krea-2-turbo/euler-beta.webp) | [![Heun / beta](docs/images/krea-2-turbo/heun-beta.webp)](docs/images/krea-2-turbo/heun-beta.webp) |
+| **simple** | [![res_2s / simple](docs/images/krea-2-turbo/res_2s-simple.webp)](docs/images/krea-2-turbo/res_2s-simple.webp) | [![Euler / simple](docs/images/krea-2-turbo/euler-simple.webp)](docs/images/krea-2-turbo/euler-simple.webp) | [![Heun / simple](docs/images/krea-2-turbo/heun-simple.webp)](docs/images/krea-2-turbo/heun-simple.webp) |
+
+</details>
+
+[可下载的 Krea 2 Turbo 示例工作流](examples/krea-2-turbo-xy.json)使用静物提示词，可替换成自己的测试题材。
+
 ## 安装
 
 从仓库的 **Code → Download ZIP** 下载并解压，将包含 `__init__.py` 的目录命名为 `loulan-xy`，放入本机 ComfyUI 的 `custom_nodes/`，重启 ComfyUI 后搜索 `loulan-xy`。
