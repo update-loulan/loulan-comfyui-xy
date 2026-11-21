@@ -26,7 +26,7 @@
 
 ## 从示例开始
 
-将 [Anima 3×2 工作流](examples/loulan-xy-3x2.json) 拖入画布。示例使用 `anima-base-v1.0.safetensors`、`qwen_3_06b_base.safetensors` 和 `qwen_image_vae.safetensors`，以相同的 seed 比较 3 个采样器 × 2 个调度器。点击运行，随后使用执行端的「查看结果」。
+将 [Anima 3×2 工作流](examples/anima-xy.json) 拖入画布。示例使用 `anima-base-v1.0.safetensors`、`qwen_3_06b_base.safetensors` 和 `qwen_image_vae.safetensors`，以相同的 seed 比较 3 个采样器 × 2 个调度器。点击运行，随后使用执行端的「查看结果」。
 
 按模型选择其他公开示例：[Qwen Image 2.1](examples/qwen-image-2-1-xy.json)、[MOSS Image](examples/moss-image-xy.json)、[Krea 2 Turbo](examples/krea-2-turbo-xy.json)、[Z-Image Turbo](examples/z-image-turbo-xy.json)。将对应 JSON 拖入画布，在加载器里选择已安装的模型权重、文本编码器和 VAE。所有示例都使用中性的静物提示词和同一固定种子。
 
