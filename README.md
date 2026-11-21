@@ -22,6 +22,8 @@
 
 ## 安装
 
+在 ComfyUI Manager 的自定义节点列表中搜索 `loulan-xy`。核对显示名 **Loulan XY** 和发布者 `@update-loulan`，选择安装，再重启 ComfyUI。[查看 Comfy Registry 条目](https://registry.comfy.org/nodes/loulan-xy)
+
 从仓库的 **Code → Download ZIP** 下载并解压，将包含 `__init__.py` 的目录命名为 `loulan-xy`，放入本机 ComfyUI 的 `custom_nodes/`，重启 ComfyUI 后搜索 `loulan-xy`。
 
 ## 从示例开始
