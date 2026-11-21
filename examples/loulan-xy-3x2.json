@@ -1,0 +1,559 @@
+{
+  "id": "d3ed0c22-2743-5c3a-89a7-61c998850331",
+  "revision": 0,
+  "last_node_id": 8,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        312,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "anima-base-v1.0.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "anima-base-v1.0.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [
+        40,
+        225
+      ],
+      "size": [
+        312,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            1,
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen_3_06b_base.safetensors",
+        "stable_diffusion",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen_3_06b_base.safetensors",
+        "type": "stable_diffusion",
+        "device": "default"
+      }
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [
+        40,
+        448
+      ],
+      "size": [
+        312,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "qwen_image_vae.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "qwen_image_vae.safetensors"
+      }
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [
+        420,
+        206
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "title": "正向提示词",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A cobalt blue ceramic teapot with a white peony pattern, sunlight on a wooden table."
+      ],
+      "widgets_values_named": {
+        "text": "A cobalt blue ceramic teapot with a white peony pattern, sunlight on a wooden table."
+      }
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [
+        420,
+        432
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "title": "负向提示词",
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "blurry"
+      ],
+      "widgets_values_named": {
+        "text": "blurry"
+      }
+    },
+    {
+      "id": 6,
+      "type": "EmptyLatentImage",
+      "pos": [
+        40,
+        644
+      ],
+      "size": [
+        312,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyLatentImage"
+      },
+      "widgets_values": [
+        512,
+        512,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 512,
+        "height": 512,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": 7,
+      "type": "LoulanXYSampler",
+      "pos": [
+        420,
+        664
+      ],
+      "size": [
+        312,
+        572
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "other_axis",
+          "shape": 7,
+          "type": "LOULAN_SCHEDULERS",
+          "link": null
+        },
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": null
+        },
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": null
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": null
+        },
+        {
+          "name": "latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "采样器列表",
+          "type": "LOULAN_SAMPLERS",
+          "links": [
+            8
+          ]
+        },
+        {
+          "name": "XY 总图",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "结果目录名",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "X · 选择采样器",
+      "properties": {
+        "Node name for S&R": "LoulanXYSampler"
+      },
+      "widgets_values": [
+        "selection",
+        [
+          "euler",
+          "heun",
+          "dpmpp_2m"
+        ],
+        "simple",
+        42,
+        "fixed",
+        20,
+        4,
+        1,
+        "loulan-xy",
+        false,
+        320,
+        false,
+        false,
+        "euler",
+        "simple",
+        "",
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "mode": "selection",
+        "selection": [
+          "euler",
+          "heun",
+          "dpmpp_2m"
+        ],
+        "fixed": "simple",
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "steps": 20,
+        "cfg": 4,
+        "denoise": 1,
+        "session": "loulan-xy",
+        "resume": false,
+        "tile_size": 320,
+        "transpose": false,
+        "use_baseline": false,
+        "baseline_sampler": "euler",
+        "baseline_scheduler": "simple",
+        "favorites": "",
+        "seeds": "",
+        "loulan_xy_controls": ""
+      }
+    },
+    {
+      "id": 8,
+      "type": "LoulanXYScheduler",
+      "pos": [
+        900,
+        40
+      ],
+      "size": [
+        312,
+        572
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "other_axis",
+          "shape": 7,
+          "type": "LOULAN_SAMPLERS",
+          "link": 8
+        },
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 3
+        },
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": 4
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": 5
+        },
+        {
+          "name": "latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": 6
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "调度器列表",
+          "type": "LOULAN_SCHEDULERS",
+          "links": null
+        },
+        {
+          "name": "XY 总图",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "结果目录名",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "title": "Y · 测试调度器",
+      "properties": {
+        "Node name for S&R": "LoulanXYScheduler"
+      },
+      "widgets_values": [
+        "test",
+        [
+          "simple",
+          "karras"
+        ],
+        "euler",
+        42,
+        "fixed",
+        18,
+        4,
+        1,
+        "anima-teapot-3x2",
+        false,
+        320,
+        false,
+        false,
+        "euler",
+        "simple",
+        "",
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "mode": "test",
+        "selection": [
+          "simple",
+          "karras"
+        ],
+        "fixed": "euler",
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "steps": 18,
+        "cfg": 4,
+        "denoise": 1,
+        "session": "anima-teapot-3x2",
+        "resume": false,
+        "tile_size": 320,
+        "transpose": false,
+        "use_baseline": false,
+        "baseline_sampler": "euler",
+        "baseline_scheduler": "simple",
+        "favorites": "",
+        "seeds": "",
+        "loulan_xy_controls": ""
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      4,
+      0,
+      "CLIP"
+    ],
+    [
+      2,
+      2,
+      0,
+      5,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      1,
+      0,
+      8,
+      1,
+      "MODEL"
+    ],
+    [
+      4,
+      4,
+      0,
+      8,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      5,
+      5,
+      0,
+      8,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      6,
+      6,
+      0,
+      8,
+      4,
+      "LATENT"
+    ],
+    [
+      7,
+      3,
+      0,
+      8,
+      5,
+      "VAE"
+    ],
+    [
+      8,
+      7,
+      0,
+      8,
+      0,
+      "LOULAN_SAMPLERS"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.74,
+      "offset": [
+        70,
+        50
+      ]
+    }
+  },
+  "version": 0.4
+}

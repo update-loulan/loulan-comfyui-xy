@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>楼兰 XY · 采样对比</title>
+<style>
+:root{color-scheme:dark;--bg:#111516;--panel:#1a2021;--border:#374244;--muted:#abb9b7;--text:#edf3ef;--accent:#c8f3ba;--error:#ffaaa4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 "DM Sans","Microsoft YaHei UI",system-ui,sans-serif}
+main{width:min(1460px,100%);margin:auto;padding:24px clamp(14px,3vw,50px) 52px}
+header,.bar,.actions,.selector,.caption{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+header{justify-content:space-between;margin-bottom:6px}
+h1,h2,p{margin:0}h1{font-size:clamp(24px,3.3vw,38px);letter-spacing:-.04em}
+h2{font-size:18px;margin-right:auto}section{margin-top:20px}
+button,select,input,textarea,a.btn{font:inherit;color:var(--text);background:#262e30;border:1px solid var(--border);border-radius:6px;padding:6px 11px}
+button,a.btn{cursor:pointer}button:hover,a.btn:hover{border-color:#a8c7b9}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}.btn{text-decoration:none}
+input[type=checkbox],input[type=range]{accent-color:var(--accent);vertical-align:middle}
+label{color:var(--muted);font-size:14px}
+label input:not([type=checkbox]),label select{margin-left:4px}
+small,.muted,#meta{color:var(--muted)}
+#notice{min-height:1.6em;overflow-wrap:anywhere;color:var(--accent)}#notice.error{color:var(--error)}
+.panel{border:1px solid var(--border);border-radius:10px;background:var(--panel);padding:16px}
+.panel>.bar:not(:last-child){margin-bottom:12px}
+#runs{width:min(52vw,380px)}.grow{flex:1;min-width:150px}
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(190px,100%),1fr));gap:12px;margin-top:12px}
+.card{min-width:0;background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.card.star{border-color:#87a97c}.thumb{display:block;width:100%;padding:0;border:0;background:#0e1011;border-radius:0}
+.thumb img{display:block;width:100%;height:142px;object-fit:contain}
+.cardbody{padding:9px}.name{font-size:14px;font-weight:650;overflow-wrap:anywhere}.smallbtn{padding:1px 8px;font-size:13px}
+.card .actions{gap:5px;margin-top:6px}.card .error{padding:10px;overflow-wrap:anywhere;color:var(--error)}
+.columns{display:grid;grid-template-columns:1.35fr 1fr;gap:14px;align-items:start}
+@media(max-width:840px){.columns{grid-template-columns:1fr}#runs{width:min(63vw,380px)}}
+.stage{position:relative;max-width:100%;margin:10px auto;background:#0c1010;touch-action:none;user-select:none;line-height:0}
+canvas{width:100%;height:100%;display:block}
+.stage.crop{cursor:crosshair}.stage.wipe{cursor:ew-resize}
+#selection{position:absolute;border:2px solid #f5e38e;box-shadow:0 0 0 1px #242118 inset;pointer-events:none}
+#wipe{width:min(260px,100%)}.vertical{display:grid;gap:12px}
+#retestSeeds{width:100%}#packet{width:100%;min-height:72px}
+fieldset{border:0;margin:0;padding:0}legend{font-weight:650;margin-bottom:6px}
+summary{cursor:pointer}#saved a{display:block;overflow-wrap:anywhere;margin-top:4px}
+[hidden]{display:none!important}
+dialog{color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:9px;width:min(1100px,94vw);max-height:94dvh}
+dialog::backdrop{background:#050809d9}dialog .bar{margin-bottom:10px}
+#largeBox{overflow:auto;max-height:74vh;background:#090c0c}#large{display:block;margin:auto;max-width:100%;height:auto}#large.native{max-width:none;margin:0}
+</style>
+</head>
+<body>
+<main>
+<header><h1>楼兰 XY · 采样对比</h1>
+<div class="selector"><label>测试记录 <select id="runs" aria-label="测试记录"></select></label><button id="refresh">刷新</button></div></header>
+<p id="meta"></p><p id="notice" role="status" aria-live="polite"></p>
+<div id="content" hidden>
+<section class="columns">
+ <div class="panel">
+  <div class="bar"><h2>A/B 对比</h2><button id="cropMode" aria-pressed="false">框选相同细节</button><button id="clearCrop">清除选区</button></div>
+  <div id="compareInfo" class="muted"></div>
+  <div class="stage wipe" id="stage" hidden><canvas id="compare" aria-label="两张单图的同位置滑动对比"></canvas><div id="selection" hidden></div></div>
+  <div class="bar"><label>A/B 分界 <input id="wipe" type="range" min="0" max="100" value="50"></label><span id="region" class="muted"></span></div>
+ </div>
+ <div class="panel vertical">
+  <fieldset><legend>从已保存的单图重新排版</legend>
+  <div class="bar"><label>图格长边 <select id="tile"><option>128</option><option>192</option><option selected>256</option><option>384</option><option>512</option><option>768</option></select> px</label>
+   <label><input id="transpose" type="checkbox"> 交换横纵轴</label><label><input id="useStars" type="checkbox"> 仅收藏组合</label></div>
+  <div class="actions"><a id="originalGrid" class="btn" target="_blank" rel="noopener" hidden>查看原始 XY 整图</a><button id="makeGrid">保存整图</button><button id="makeDetail" disabled>保存同区域细节图</button></div>
+  </fieldset>
+  <fieldset><legend>复测收藏组合 <small id="starCount"></small></legend>
+   <label>种子（多个用逗号或空格分隔）<input id="retestSeeds" type="text" autocomplete="off"></label>
+   <div class="actions"><button id="toNode">发送到工作流</button><button id="copy">复制复测配置</button></div>
+   <textarea id="packet" aria-label="复测配置" readonly hidden></textarea>
+  </fieldset>
+  <details id="exports"><summary>已保存的对比图</summary><div id="saved"></div></details>
+ </div>
+</section>
+<section><div class="bar"><h2>单图结果</h2><label><input type="checkbox" id="onlyStars"> 仅看收藏</label>
+ <label>种子 <select id="seedFilter"></select></label>
+ <input id="search" class="grow" type="search" placeholder="搜索采样器或调度器" aria-label="搜索采样器或调度器">
+ <span id="count" class="muted"></span></div><div id="cards"></div></section>
+</div>
+</main>
+<dialog id="light"><div class="bar"><h2 id="largeName"></h2><button id="sizeToggle">原始像素</button><a id="download" class="btn" download>下载 PNG</a><button id="closeLight">关闭</button></div><div id="largeBox"><img id="large" alt="单图原图"></div></dialog>
+<script>
+"use strict";
+const el = id => document.getElementById(id);
+const base = location.pathname.replace(/\/review\/?$/, "");
+const requested = new URL(location.href).searchParams.get("run");
+let run = "", manifest = null, favorites = [], variants = [], aIndex = -1, bIndex = -1;
+let bitmapA = null, bitmapB = null, crop = null, picking = false, start = null, viewToken = 0, loadToken = 0;
+let savingStars = false, creating = false;
+const pairOf = row => [row.sampler, row.scheduler];
+const key = pair => JSON.stringify(pair);
+const starred = row => favorites.some(pair => key(pair) === key(pairOf(row)));
+const currentBase = () => base + "/runs/" + encodeURIComponent(run);
+const imageURL = index => currentBase() + "/image/" + index;
+const label = row => row.sampler + " / " + row.scheduler;
+const notify = (s, error = false) => { el("notice").textContent = s; el("notice").classList.toggle("error", error); };
+function create(tag, text, cls) {
+  const element = document.createElement(tag);
+  if (text !== undefined) element.textContent = text;
+  if (cls) element.className = cls;
+  return element;
+}
+function option(select, value, name) { select.add(new Option(name, value)); }
+function act(button, func) {
+  button.addEventListener("click", () => Promise.resolve().then(func).catch(error => notify(error.message, true)));
+}
+async function api(url, payload) {
+  const config = payload === undefined ? {cache:"no-store"} :
+      {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)};
+  const response = await fetch(url, config);
+  if (!response.ok) throw new Error((await response.text()) || ("HTTP " + response.status));
+  return response.json();
+}
+async function refresh(preferred) {
+  const runs = await api(base + "/runs");
+  el("runs").replaceChildren();
+  for (const item of runs) option(el("runs"), item, item);
+  if (!runs.length) {
+    ++loadToken; ++viewToken; manifest = null; run = ""; el("content").hidden = true;
+    el("meta").textContent = ""; notify("没有已保存的测试记录。"); return;
+  }
+  if (preferred && !runs.includes(preferred)) {
+    el("content").hidden = true; notify("找不到测试记录 " + preferred + "，可在列表中选择其他记录。", true);
+    el("runs").selectedIndex = -1; return;
+  }
+  el("runs").value = preferred || runs[0];
+  await load(el("runs").value);
+}
+async function load(id) {
+  const token = ++loadToken; ++viewToken; el("content").hidden = true; notify("正在读取记录…");
+  const data = await api(base + "/runs/" + encodeURIComponent(id));
+  if (token !== loadToken) return;
+  run = id; manifest = data; favorites = data.favorites; variants = data.variants;
+  el("originalGrid").href = currentBase() + "/grid"; el("originalGrid").hidden = !data.has_grid;
+  const url = new URL(location.href); url.searchParams.set("run", id); history.replaceState(null, "", url);
+  crop = null; start = null; picking = false; el("search").value = ""; el("onlyStars").checked = false;
+  el("useStars").checked = false; el("packet").hidden = true;
+  const rows = data.rows, success = rows.map((r, i) => r.status === "ok" ? i : -1).filter(i => i >= 0);
+  const seeds = data.settings.seeds || [...new Set(rows.map(r => String(r.seed)))];
+  el("seedFilter").replaceChildren(); option(el("seedFilter"), "", "全部");
+  for (const seed of seeds) option(el("seedFilter"), String(seed), String(seed));
+  el("retestSeeds").value = seeds.join(", ");
+  const err = rows.filter(r => r.status === "error").length;
+  const expected = (data.settings.pairs || []).length * seeds.length;
+  el("meta").textContent = "成功 " + success.length + " 张 · 失败 " + err + " 张" +
+      (expected ? " · 计划 " + expected + " 张" : "") +
+      (data.settings.steps != null ? " · " + data.settings.steps + " steps · CFG " + data.settings.cfg : "");
+  aIndex = success[0] ?? -1; bIndex = success[1] ?? aIndex;
+  el("content").hidden = false; drawCards(); drawExports(); updateCrop(); notify("");
+  await updateCompare();
+}
+function drawCards() {
+  const term = el("search").value.trim().toLowerCase(), seed = el("seedFilter").value;
+  const cards = document.createDocumentFragment(); let total = 0;
+  manifest.rows.forEach((row, i) => {
+    const star = starred(row);
+    if ((el("onlyStars").checked && !star) || (seed && seed !== String(row.seed)) ||
+        !label(row).toLowerCase().includes(term)) return;
+    const card = create("article", undefined, "card" + (star ? " star" : ""));
+    if (row.status === "ok") {
+      const thumb = create("button", undefined, "thumb"); thumb.title = "查看原图";
+      const image = create("img"); image.alt = label(row); image.loading = "lazy"; image.src = imageURL(i);
+      thumb.append(image); act(thumb, () => openLarge(i)); card.append(thumb);
+    } else card.append(create("div", row.error || row.status, "error"));
+    const box = create("div", undefined, "cardbody");
+    box.append(create("div", label(row), "name"));
+    let time = typeof row.seconds === "number" ? " · " + row.seconds.toFixed(2) + " s" : "";
+    if (Number.isFinite(row.relative_speed)) time += " · " + row.relative_speed.toFixed(2) + "×";
+    box.append(create("small", "Seed " + row.seed + time));
+    if (row.status === "ok") {
+      const controls = create("div", undefined, "actions");
+      const select = (text, title, fn) => {
+        const btn = create("button", text, "smallbtn"); btn.title = title; act(btn, fn); controls.append(btn); return btn;
+      };
+      const btn = select(star ? "★ 已收藏" : "☆ 收藏", "按采样器与调度器组合收藏", () => toggleStar(row));
+      btn.disabled = savingStars; btn.setAttribute("aria-pressed", String(star));
+      select(i === aIndex ? "✓ A" : "设为 A", "用作对比 A", () => choose("a", i));
+      select(i === bIndex ? "✓ B" : "设为 B", "用作对比 B", () => choose("b", i));
+      box.append(controls);
+    }
+    card.append(box); cards.append(card); total++;
+  });
+  el("cards").replaceChildren(cards); el("count").textContent = total + " 张";
+  el("starCount").textContent = favorites.length + " 组"; el("copy").disabled = !favorites.length;
+  el("toNode").disabled = !favorites.length;
+}
+async function toggleStar(row) {
+  if (savingStars) return;
+  const id = run, pair = pairOf(row);
+  const next = starred(row) ? favorites.filter(p => key(p) !== key(pair)) : favorites.concat([pair]);
+  savingStars = true; drawCards();
+  try {
+    const result = await api(currentBase() + "/favorites", {pairs:next});
+    if (id === run) { favorites = result.favorites; notify("已保存收藏。"); }
+  } finally { savingStars = false; drawCards(); }
+}
+function openLarge(index) {
+  const row = manifest.rows[index];
+  el("large").src = imageURL(index); el("largeName").textContent = label(row) + " · " + row.seed;
+  el("download").href = imageURL(index); el("download").download = row.filename.split("/").pop();
+  el("large").classList.remove("native"); el("sizeToggle").textContent = "原始像素"; el("light").showModal();
+}
+async function choose(side, index) {
+  if (side === "a") aIndex = index; else bIndex = index;
+  drawCards(); await updateCompare();
+}
+function loadImg(index) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(); img.onload = () => resolve(img); img.onerror = () => reject(new Error("单图读取失败"));
+    img.src = imageURL(index);
+  });
+}
+async function updateCompare() {
+  const token = ++viewToken; bitmapA = bitmapB = null; el("stage").hidden = true;
+  if (aIndex < 0 || bIndex < 0) { el("compareInfo").textContent = "等待第一张成功的单图"; return; }
+  const ra = manifest.rows[aIndex], rb = manifest.rows[bIndex];
+  el("compareInfo").textContent = "A　" + label(ra) + " · " + ra.seed + "　｜　B　" + label(rb) + " · " + rb.seed;
+  const im = await loadImg(aIndex); if (token !== viewToken) return;
+  const other = aIndex === bIndex ? im : await loadImg(bIndex); if (token !== viewToken) return;
+  bitmapA = im; bitmapB = other; el("stage").hidden = false;
+  const scale = Math.min(1, 1280 / ra.width, 960 / ra.height);
+  const canvas = el("compare"); canvas.width = Math.max(1, Math.round(ra.width * scale));
+  canvas.height = Math.max(1, Math.round(ra.height * scale));
+  el("stage").style.width = Math.min(canvas.width, canvas.width * 480 / canvas.height) + "px";
+  renderCompare();
+}
+function renderCompare() {
+  if (!bitmapA || !bitmapB) return;
+  const canvas = el("compare"), ctx = canvas.getContext("2d"), w = canvas.width, h = canvas.height;
+  const split = Math.round(w * Number(el("wipe").value) / 100);
+  const draw = (image, r) => ctx.drawImage(image, 0, 0, r.width, r.height, 0, 0, w, h);
+  draw(bitmapB, manifest.rows[bIndex]); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, split, h); ctx.clip();
+  draw(bitmapA, manifest.rows[aIndex]); ctx.restore();
+  if (split > 0 && split < w) { ctx.fillStyle = "#c8f3ba"; ctx.fillRect(split-1, 0, 2, h); }
+}
+function updateCrop() {
+  const box = el("selection"); box.hidden = !crop;
+  if (crop) {
+    const [x,y,w,h] = crop;
+    Object.assign(box.style,{left:x*100+"%",top:y*100+"%",width:w*100+"%",height:h*100+"%"});
+  }
+  el("makeDetail").disabled = !crop || !crop[2] || !crop[3] || creating;
+  el("region").textContent = crop ? "已选区域 " + Math.round(crop[2]*100) + "% × " + Math.round(crop[3]*100) + "%" : "";
+  el("cropMode").textContent = picking ? "退出框选" : "框选相同细节";
+  el("cropMode").setAttribute("aria-pressed", String(picking));
+  el("stage").className = "stage " + (picking ? "crop" : "wipe");
+}
+function position(event) {
+  const rect = el("stage").getBoundingClientRect(), limit = n => Math.max(0, Math.min(1, n));
+  return [limit((event.clientX-rect.left)/rect.width), limit((event.clientY-rect.top)/rect.height)];
+}
+function move(event) {
+  if (!start) return;
+  const [x,y] = position(event);
+  if (!picking) { el("wipe").value = Math.round(x*100); renderCompare(); return; }
+  crop = [Math.min(x,start[0]), Math.min(y,start[1]), Math.abs(x-start[0]), Math.abs(y-start[1])]; updateCrop();
+}
+el("stage").addEventListener("pointerdown", event => {
+  if (event.button !== 0) return;
+  el("stage").setPointerCapture(event.pointerId); start = position(event); move(event);
+});
+el("stage").addEventListener("pointermove", move);
+el("stage").addEventListener("pointerup", event => {
+  if (!start) return;
+  move(event); start = null;
+  if (picking) {
+    if (crop[2] < 0.002 || crop[3] < 0.002) crop = null;
+    else { picking = false; notify("细节图会使用每张原图的相同相对区域。"); }
+    updateCrop();
+  }
+});
+el("stage").addEventListener("pointercancel", () => { start = null; });
+act(el("cropMode"), () => { picking = !picking; updateCrop(); if (picking) notify("在对比图上拖出矩形选区。"); });
+act(el("clearCrop"), () => { crop = null; picking = false; updateCrop(); });
+el("wipe").addEventListener("input", renderCompare);
+function drawExports() {
+  const saved = el("saved"); saved.replaceChildren();
+  for (const name of variants) {
+    const link = create("a", name); link.href = currentBase()+"/variants/"+encodeURIComponent(name);
+    link.target = "_blank"; link.rel = "noopener"; saved.append(link);
+  }
+  if (!variants.length) saved.append(create("small","还没有重新排版的图片。"));
+}
+async function makeImage(detail) {
+  if (creating || (detail && !crop)) return;
+  if (el("useStars").checked && !favorites.length) throw new Error("请先收藏至少一个组合。");
+  const id = run; creating = true; el("makeGrid").disabled = true; updateCrop(); notify("正在从已保存的单图排版…");
+  try {
+    const result = await api(currentBase()+"/variants", {
+      tile_size:Number(el("tile").value),transpose:el("transpose").checked,
+      pairs:el("useStars").checked ? favorites : null,crop:detail ? crop : null
+    });
+    if (run === id) {
+      variants.unshift(result.name); drawExports(); el("exports").open = true; notify("已保存到本次测试的 derived 文件夹。");
+    }
+  } finally { creating = false; el("makeGrid").disabled = false; updateCrop(); }
+}
+function retestPacket() {
+  const tokens = el("retestSeeds").value.trim().split(/[,，;；\s]+/).filter(Boolean);
+  if (!tokens.length || tokens.some(s => !/^\d{1,20}$/.test(s) || BigInt(s) > 18446744073709551615n))
+    throw new Error("种子须为 0 至 18446744073709551615 的整数。");
+  if (!favorites.length) throw new Error("请先收藏至少一个组合。");
+  return {run, pairs:favorites, seeds:[...new Set(tokens.map(s => BigInt(s).toString()))]};
+}
+async function copyPacket() {
+  const text = JSON.stringify(retestPacket());
+  try { await navigator.clipboard.writeText(text); el("packet").hidden = true; notify("复测配置已复制。"); }
+  catch { const area = el("packet"); area.value = text; area.hidden = false; area.focus(); area.select(); notify("复测配置已选中，按 Ctrl+C 复制。"); }
+}
+act(el("toNode"), () => {
+  const packet = retestPacket();
+  if (!window.opener || window.opener.closed) throw new Error("请从工作流节点打开查看器，或使用「复制复测配置」。");
+  window.opener.postMessage({type:"loulan-xy-favorites",...packet}, location.origin);
+  notify("已发送收藏组合和种子，请在工作流中确认并运行。");
+});
+act(el("copy"), copyPacket); act(el("makeGrid"), () => makeImage(false)); act(el("makeDetail"), () => makeImage(true));
+act(el("closeLight"), () => el("light").close());
+act(el("sizeToggle"), () => { const native = el("large").classList.toggle("native"); el("sizeToggle").textContent = native ? "适应窗口" : "原始像素"; });
+el("runs").addEventListener("change", () => load(el("runs").value).catch(e => notify(e.message,true)));
+for (const id of ["onlyStars","seedFilter","search"]) el(id).addEventListener("input", drawCards);
+act(el("refresh"), () => refresh(run || null)); refresh(requested).catch(e => notify(e.message,true));
+</script>
+</body>
+</html>

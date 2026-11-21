@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+output/
+user/
+*.png
+*.csv
+*.safetensors
+*.gguf
+.DS_Store
+Thumbs.db

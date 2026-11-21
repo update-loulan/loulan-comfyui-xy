@@ -1,0 +1,609 @@
+{
+  "id": "6e79ba59-c170-461c-8779-e9c3b363ee05",
+  "revision": 0,
+  "last_node_id": 9,
+  "last_link_id": 9,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [
+        30,
+        40
+      ],
+      "size": [
+        330,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "moss_image_sft_bf16.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "moss_image_sft_bf16.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [
+        30,
+        250
+      ],
+      "size": [
+        330,
+        106
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            2,
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen3.5_9b_bf16.safetensors",
+        "moss_image",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen3.5_9b_bf16.safetensors",
+        "type": "moss_image",
+        "device": "default"
+      }
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [
+        30,
+        480
+      ],
+      "size": [
+        330,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "flux2-vae.safetensors"
+      }
+    },
+    {
+      "id": 4,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [
+        30,
+        655
+      ],
+      "size": [
+        330,
+        106
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 1024,
+        "height": 1024,
+        "batch_size": 1
+      }
+    },
+    {
+      "id": 5,
+      "type": "SkipLayerGuidanceDiTSimple",
+      "pos": [
+        420,
+        40
+      ],
+      "size": [
+        330,
+        130
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SkipLayerGuidanceDiTSimple"
+      },
+      "widgets_values": [
+        "",
+        "22",
+        0,
+        0.5
+      ],
+      "widgets_values_named": {
+        "double_layers": "",
+        "single_layers": "22",
+        "start_percent": 0,
+        "end_percent": 0.5
+      }
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [
+        420,
+        280
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A still life of a matte white ceramic pitcher, two green pears and a folded blue linen cloth on an oak table. Soft afternoon window light, gentle shadows, realistic surfaces."
+      ],
+      "widgets_values_named": {
+        "text": "A still life of a matte white ceramic pitcher, two green pears and a folded blue linen cloth on an oak table. Soft afternoon window light, gentle shadows, realistic surfaces."
+      }
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [
+        420,
+        538
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "text": ""
+      }
+    },
+    {
+      "id": 8,
+      "type": "LoulanXYSampler",
+      "pos": [
+        900,
+        40
+      ],
+      "size": [
+        360,
+        572
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "other_axis",
+          "shape": 7,
+          "type": "LOULAN_SCHEDULERS",
+          "link": null
+        },
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": null
+        },
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": null
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": null
+        },
+        {
+          "name": "latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "采样器列表",
+          "type": "LOULAN_SAMPLERS",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "XY 总图",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "结果目录名",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoulanXYSampler"
+      },
+      "widgets_values": [
+        "selection",
+        [
+          "euler",
+          "heun",
+          "dpmpp_2m"
+        ],
+        "simple",
+        42,
+        "fixed",
+        20,
+        4,
+        1,
+        "loulan-xy",
+        false,
+        320,
+        false,
+        false,
+        "euler",
+        "simple",
+        "",
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "mode": "selection",
+        "selection": [
+          "euler",
+          "heun",
+          "dpmpp_2m"
+        ],
+        "fixed": "simple",
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "steps": 20,
+        "cfg": 4,
+        "denoise": 1,
+        "session": "loulan-xy",
+        "resume": false,
+        "tile_size": 320,
+        "transpose": false,
+        "use_baseline": false,
+        "baseline_sampler": "euler",
+        "baseline_scheduler": "simple",
+        "favorites": "",
+        "seeds": "",
+        "loulan_xy_controls": ""
+      }
+    },
+    {
+      "id": 9,
+      "type": "LoulanXYScheduler",
+      "pos": [
+        1350,
+        240
+      ],
+      "size": [
+        390,
+        572
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "other_axis",
+          "shape": 7,
+          "type": "LOULAN_SAMPLERS",
+          "link": 4
+        },
+        {
+          "name": "model",
+          "shape": 7,
+          "type": "MODEL",
+          "link": 5
+        },
+        {
+          "name": "positive",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": 6
+        },
+        {
+          "name": "negative",
+          "shape": 7,
+          "type": "CONDITIONING",
+          "link": 7
+        },
+        {
+          "name": "latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": 8
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "调度器列表",
+          "type": "LOULAN_SCHEDULERS",
+          "links": null
+        },
+        {
+          "name": "XY 总图",
+          "type": "IMAGE",
+          "links": null
+        },
+        {
+          "name": "结果目录名",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoulanXYScheduler"
+      },
+      "widgets_values": [
+        "test",
+        [
+          "simple",
+          "karras"
+        ],
+        "euler",
+        42,
+        "fixed",
+        25,
+        2.5,
+        1,
+        "xy-example",
+        false,
+        320,
+        false,
+        false,
+        "euler",
+        "simple",
+        "",
+        "",
+        ""
+      ],
+      "widgets_values_named": {
+        "mode": "test",
+        "selection": [
+          "simple",
+          "karras"
+        ],
+        "fixed": "euler",
+        "seed": 42,
+        "control_after_generate": "fixed",
+        "steps": 25,
+        "cfg": 2.5,
+        "denoise": 1,
+        "session": "xy-example",
+        "resume": false,
+        "tile_size": 320,
+        "transpose": false,
+        "use_baseline": false,
+        "baseline_sampler": "euler",
+        "baseline_scheduler": "simple",
+        "favorites": "",
+        "seeds": "",
+        "loulan_xy_controls": ""
+      }
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      5,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      2,
+      0,
+      7,
+      0,
+      "CLIP"
+    ],
+    [
+      3,
+      2,
+      0,
+      6,
+      0,
+      "CLIP"
+    ],
+    [
+      4,
+      8,
+      0,
+      9,
+      0,
+      "LOULAN_SAMPLERS"
+    ],
+    [
+      5,
+      5,
+      0,
+      9,
+      1,
+      "MODEL"
+    ],
+    [
+      6,
+      6,
+      0,
+      9,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      7,
+      7,
+      0,
+      9,
+      3,
+      "CONDITIONING"
+    ],
+    [
+      8,
+      4,
+      0,
+      9,
+      4,
+      "LATENT"
+    ],
+    [
+      9,
+      3,
+      0,
+      9,
+      5,
+      "VAE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.65,
+      "offset": [
+        65,
+        55
+      ]
+    }
+  },
+  "version": 0.4
+}
